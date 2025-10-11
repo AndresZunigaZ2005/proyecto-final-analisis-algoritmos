@@ -1,0 +1,39 @@
+# --- Entornos virtuales ---
+venv/
+.env/
+*.env
+
+# --- Compilados y temporales de Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+
+# --- Archivos de entorno y configuración local ---
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# --- Modelos, descargas o cachés ---
+.cache/
+*.pkl
+*.pt
+*.bin
+*.h5
+*.ckpt
+*.safetensors
+
+# --- Datos generados ---
+data/*.csv
+!data/.gitkeep
+
+# --- Playwright y navegador ---
+playwright-report/
+test-results/
+.user-data-dir/
+
+# --- Archivos del sistema ---
+Thumbs.db
+ehthumbs.db
+desktop.ini

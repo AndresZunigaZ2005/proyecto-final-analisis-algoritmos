@@ -1,0 +1,18 @@
+# --- Web Scraping ---
+playwright>=1.40.0
+tqdm
+pandas
+
+# --- NLP y Similitud Semántica ---
+sentence-transformers
+scikit-learn
+spacy
+textdistance
+
+# --- Visualización y Análisis ---
+matplotlib
+seaborn
+
+# --- Utilidades adicionales ---
+numpy
+torch
