@@ -208,13 +208,3 @@ Parámetros (si deseas modificar):
 1. Abre `src/download/downloader.py` y busca la función correspondiente (`scrape_acm`, `scrape_sciencedirect`, `scrape_sage`).
 2. Actualiza los selectores CSS en las líneas que usan `get_text()` o `eval_on_selector_all()`.
 3. Prueba localmente en modo visible para depurar.
-
----
-
-## Contacto y contribuciones
-
-Si quieres que implemente mejoras (p. ej. descargar BibTeX automáticamente cuando haya acceso institucional, mejorar deduplicación semántica, o crear visualizaciones), dime cuáles y lo integro.
-
----
-
-¡Listo! El README está en la raíz del proyecto. Ábrelo desde VS Code para revisar los comandos y la información de acceso.
