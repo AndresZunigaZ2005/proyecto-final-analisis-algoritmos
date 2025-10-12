@@ -1,3 +1,9 @@
+import os
+import sys
+
+# Agregar el directorio raíz del proyecto al sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import asyncio
 from src.download.downloader import run_all
 from src.download.merger import merge_and_deduplicate

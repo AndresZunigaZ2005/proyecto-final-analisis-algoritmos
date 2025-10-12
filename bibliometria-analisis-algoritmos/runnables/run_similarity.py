@@ -1,12 +1,20 @@
 import os
+import sys
+
+# Agregar el directorio raíz del proyecto al sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import pandas as pd
 from src.similarity.ai_models import load_sentence_model
 from src.similarity.vector_models import compute_embeddings
 from src.similarity.compare import compute_similarity
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+# Rutas correctas desde la raíz del proyecto
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DATA_DIR = os.path.join(BASE_DIR, "data")
 INPUT_FILE = os.path.join(DATA_DIR, "unified.csv")
 OUTPUT_FILE = os.path.join(DATA_DIR, "similarities.csv")
+
 
 # ---------- Cargar datos ----------
 df = pd.read_csv(INPUT_FILE)

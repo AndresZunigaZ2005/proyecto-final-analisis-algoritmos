@@ -12,7 +12,9 @@ textdistance
 # --- Visualización y Análisis ---
 matplotlib
 seaborn
+reportlab
 
 # --- Utilidades adicionales ---
 numpy
 torch
+networkx
