@@ -29,6 +29,7 @@ data/*.csv
 !data/.gitkeep
 
 # --- Playwright y navegador ---
+playwright_user_data/
 playwright-report/
 test-results/
 .user-data-dir/
