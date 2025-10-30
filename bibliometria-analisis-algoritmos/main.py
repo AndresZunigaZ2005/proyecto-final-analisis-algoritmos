@@ -12,12 +12,14 @@ def run_script(script_name):
 
 def main():
     while True:
-        print("\n=== 📘 PROYECTO BIBLIOMETRÍA - ANÁLISIS DE ALGORITMOS ===")
+        print("\n=== PROYECTO BIBLIOMETRÍA - ANÁLISIS DE ALGORITMOS ===")
         print("1. Requerimiento 1 - Descarga y Unificación de Artículos")
         print("2. Requerimiento 2 - Análisis de Similitud Semántica")
         print("3. Requerimiento 3 - Análisis Estadístico y Reporte PDF")
-        print("4. Salir")
-        opcion = input("\nSelecciona una opción (1-4): ").strip()
+        print("4. Requerimiento 4 - Clustering jerárquico y Dendrogramas")
+        print("5. Requerimiento 5 - Visualización de la producción científica (mapa, nube dinámica, timeline, export PDF)")
+        print("6. Salir")
+        opcion = input("\nSelecciona una opción (1-6): ").strip()
 
         if opcion == "1":
             run_script("run_downloader.py")
@@ -26,6 +28,10 @@ def main():
         elif opcion == "3":
             run_script("run_analysis.py")
         elif opcion == "4":
+            run_script("run_clustering.py")
+        elif opcion == "5":
+            run_script("run_viz_geo.py")
+        elif opcion == "6":
             print("👋 Saliendo del sistema...")
             break
         else:

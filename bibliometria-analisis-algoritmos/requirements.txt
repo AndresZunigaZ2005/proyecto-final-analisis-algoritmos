@@ -18,3 +18,8 @@ reportlab
 numpy
 torch
 networkx
+scipy
+geopy
+folium
+wordcloud
+plotly
