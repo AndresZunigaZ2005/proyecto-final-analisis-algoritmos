@@ -3,7 +3,7 @@ import pandas as pd
 
 class DataLoader:
     """Carga y valida los datos bibliométricos del proyecto."""
-    def __init__(self, data_dir="data"):
+    def __init__(self, data_dir="data/download"):
         self.data_dir = data_dir
         self.unified_path = os.path.join(data_dir, "unified.csv")
         self.similarity_path = os.path.join(data_dir, "similarities.csv")

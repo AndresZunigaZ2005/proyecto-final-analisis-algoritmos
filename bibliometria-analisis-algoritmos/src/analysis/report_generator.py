@@ -4,7 +4,7 @@ from reportlab.lib import colors
 import os
 
 class ReportGenerator:
-    def __init__(self, metrics, output_dir="data/reports"):
+    def __init__(self, metrics, output_dir="data/analysis"):
         self.metrics = metrics
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)

@@ -11,24 +11,32 @@ if __name__ == "__main__":
     print("🔍 Requerimiento 1 - Descarga de artículos")
 
     query = input("🧠 Ingresa la cadena de búsqueda: ").strip()
-    print("\nBases de datos disponibles:")
-    print("1. ACM\n2. ScienceDirect\n3. SAGE\n4. Todas")
-    option = input("Selecciona la base de datos (1-4): ").strip()
+    
+    print("\n📚 Bases de datos disponibles (100% ABIERTAS - Sin captcha):")
+    print("1. OpenAlex    - 250M+ artículos, todas las disciplinas")
+    print("2. arXiv       - 2M+ preprints (física, CS, matemáticas)")
+    print("3. PubMed      - 35M+ artículos biomédicos")
+    print("4. Todas las disponibles")
+    
+    option = input("\nSelecciona la base de datos (1-4): ").strip()
 
     if option == "1":
-        sources = ["acm"]
+        sources = ["openalex"]
     elif option == "2":
-        sources = ["sciencedirect"]
+        sources = ["arxiv"]
     elif option == "3":
-        sources = ["sage"]
+        sources = ["pubmed"]
     else:
-        sources = ["acm", "sciencedirect", "sage"]
+        sources = ["openalex", "arxiv", "pubmed"]
 
-    max_results = int(input("¿Cuántos artículos deseas descargar (máximo 10 por fuente)? ") or "10")
+    max_results = int(input("\n¿Cuántos artículos deseas descargar por fuente? (recomendado: 10-50): ") or "10")
 
-    print(f"\n🧩 Buscando '{query}' en {', '.join(sources)} ...")
-    asyncio.run(run_all(query=query, sources=sources, max_results=max_results, headless=False))
+    print(f"\n🚀 Buscando '{query}' en {', '.join(sources)}...")
+    print("⚡ Usando solo APIs REST - Sin web scraping - Rápido y confiable")
+    
+    asyncio.run(run_all(query=query, sources=sources, max_results=max_results))
 
     print("\n🔗 Unificando resultados...")
     merge_and_deduplicate()
-    print("✅ Descarga y unificación completadas.")
+    print("\n✅ Descarga y unificación completadas.")
+    print("📁 Archivos guardados en: data/download/")

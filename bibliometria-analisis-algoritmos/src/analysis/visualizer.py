@@ -6,7 +6,7 @@ class Visualizer:
         # Si no se especifica una carpeta, se usa data/reports por defecto
         if output_dir is None:
             base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-            output_dir = os.path.join(base_dir, "data", "reports")
+            output_dir = os.path.join(base_dir, "data", "analysis")
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)
 

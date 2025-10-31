@@ -10,7 +10,7 @@ Genera:
 import os, pandas as pd, re
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-DATA_DIR = os.path.join(BASE_DIR, "data")
+DATA_DIR = os.path.join(BASE_DIR, "data/download")
 
 def normalize_title(t):
     if pd.isna(t): return ""

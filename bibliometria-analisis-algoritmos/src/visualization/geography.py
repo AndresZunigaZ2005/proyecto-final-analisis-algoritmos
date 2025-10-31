@@ -16,7 +16,7 @@ def geocode_country(name):
         return GEOCACHE[name]
     return None
 
-def build_heatmap(df, country_col='country', out_html='data/reports/map.html', out_png='data/reports/map.png'):
+def build_heatmap(df, country_col='country', out_html='data/visualization/map.html', out_png='data/visualization/map.png'):
     # contar por país
     counts = Counter(df[country_col].dropna().astype(str).str.strip().tolist())
     m = folium.Map(location=[20,0], zoom_start=2)
