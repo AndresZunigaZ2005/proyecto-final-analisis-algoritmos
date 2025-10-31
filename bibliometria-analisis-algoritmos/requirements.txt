@@ -1,8 +1,11 @@
-# --- Web Scraping ---
-tqdm>=4.66.0
-pandas>=2.0.0
+# --- Streamlit ---
+streamlit>=1.28.0
+
+# --- Web Scraping (solo APIs REST) ---
 aiohttp>=3.9.0
 feedparser>=6.0.10
+tqdm>=4.66.0
+pandas>=2.0.0
 
 # --- NLP y Similitud Semántica ---
 sentence-transformers>=2.2.0
@@ -14,16 +17,14 @@ textdistance>=4.5.0
 matplotlib>=3.7.0
 seaborn>=0.12.0
 reportlab>=4.0.0
+plotly>=5.17.0
 
 # --- Utilidades adicionales ---
 numpy>=1.24.0
 torch>=2.0.0
 networkx>=3.1
 scipy>=1.11.0
-geopy>=2.4.0
-folium>=0.15.0
 wordcloud>=1.9.0
-plotly>=5.17.0
 
-# --- Opcional: Para usar modelos de spaCy ---
-# Después de instalar, ejecutar: python -m spacy download en_core_web_sm
+# NOTA: NO incluir playwright para Streamlit Cloud
+# Si lo necesitas localmente, instálalo por separado
