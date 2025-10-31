@@ -25,6 +25,8 @@ torch>=2.0.0
 networkx>=3.1
 scipy>=1.11.0
 wordcloud>=1.9.0
+folium>=0.14.0
+geopy>=2.4.0
 
 # NOTA: NO incluir playwright para Streamlit Cloud
 # Si lo necesitas localmente, instálalo por separado
