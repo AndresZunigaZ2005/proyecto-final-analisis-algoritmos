@@ -1,5 +1,5 @@
 """
-Sistema de Análisis Bibliométrico - Interfaz Web
+Sistema de Análisis Bibliométrico - Interfaz Web Completa
 Proyecto Final - Análisis de Algoritmos
 """
 
@@ -11,6 +11,8 @@ import pandas as pd
 from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
+import base64
+from PIL import Image
 
 # Configuración de la página
 st.set_page_config(
@@ -21,7 +23,7 @@ st.set_page_config(
 )
 
 # Agregar directorio al path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__))))
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 # CSS personalizado
 st.markdown("""
@@ -40,9 +42,10 @@ st.markdown("""
     }
     .metric-card {
         background-color: #f0f2f6;
-        padding: 1rem;
+        padding: 1.5rem;
         border-radius: 10px;
         border-left: 5px solid #1f77b4;
+        margin-bottom: 1rem;
     }
     .success-box {
         padding: 1rem;
@@ -65,8 +68,94 @@ st.markdown("""
         border-radius: 5px;
         margin: 1rem 0;
     }
+    .result-section {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin: 1rem 0;
+    }
 </style>
 """, unsafe_allow_html=True)
+
+# Funciones helper
+def get_pdf_download_link(file_path, link_text):
+    """Genera link de descarga para PDF"""
+    try:
+        with open(file_path, "rb") as f:
+            bytes_data = f.read()
+            b64 = base64.b64encode(bytes_data).decode()
+            href = f'<a href="data:application/pdf;base64,{b64}" download="{os.path.basename(file_path)}">{link_text}</a>'
+            return href
+    except:
+        return ""
+
+def display_csv_preview(file_path, title=""):
+    """Muestra preview de CSV con opción de descarga"""
+    try:
+        df = pd.read_csv(file_path)
+        if title:
+            st.markdown(f"#### 📄 {title}")
+        
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.info(f"📊 Total de registros: **{len(df)}** | Columnas: **{len(df.columns)}**")
+        with col2:
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Descargar CSV",
+                data=csv,
+                file_name=os.path.basename(file_path),
+                mime="text/csv",
+                key=f"download_{os.path.basename(file_path)}"
+            )
+        
+        st.dataframe(df.head(20), use_container_width=True)
+        
+        with st.expander(f"📊 Estadísticas de {title or 'datos'}"):
+            st.write(df.describe())
+        
+        return df
+    except Exception as e:
+        st.error(f"Error al cargar {file_path}: {e}")
+        return None
+
+def display_image(file_path, caption=""):
+    """Muestra imagen con opción de descarga"""
+    try:
+        st.image(file_path, caption=caption, use_column_width=True)
+        with open(file_path, "rb") as f:
+            st.download_button(
+                label="📥 Descargar imagen",
+                data=f,
+                file_name=os.path.basename(file_path),
+                mime="image/png",
+                key=f"img_{os.path.basename(file_path)}"
+            )
+    except Exception as e:
+        st.error(f"Error al mostrar imagen: {e}")
+
+def display_html(file_path, title=""):
+    """Muestra HTML embebido"""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        
+        if title:
+            st.markdown(f"#### 🗺️ {title}")
+        
+        # Usar iframe para mostrar HTML
+        st.components.v1.html(html_content, height=600, scrolling=True)
+        
+        with open(file_path, "rb") as f:
+            st.download_button(
+                label="📥 Descargar HTML",
+                data=f,
+                file_name=os.path.basename(file_path),
+                mime="text/html",
+                key=f"html_{os.path.basename(file_path)}"
+            )
+    except Exception as e:
+        st.error(f"Error al mostrar HTML: {e}")
 
 # Header
 st.markdown('<div class="main-header">📚 Sistema de Análisis Bibliométrico</div>', unsafe_allow_html=True)
@@ -84,7 +173,8 @@ with st.sidebar:
          "🔍 Análisis de Similitud", 
          "📊 Estadísticas y Reportes",
          "🌳 Clustering Jerárquico", 
-         "📈 Visualizaciones"]
+         "📈 Visualizaciones",
+         "📁 Ver Todos los Resultados"]
     )
     
     st.divider()
@@ -97,10 +187,12 @@ with st.sidebar:
         csv_files = list(data_dir.rglob("*.csv"))
         png_files = list(data_dir.rglob("*.png"))
         pdf_files = list(data_dir.rglob("*.pdf"))
+        html_files = list(data_dir.rglob("*.html"))
         
-        st.metric("📄 Archivos CSV", len(csv_files))
-        st.metric("🖼️ Imágenes", len(png_files))
-        st.metric("📑 PDFs", len(pdf_files))
+        st.metric("📄 CSV", len(csv_files))
+        st.metric("🖼️ PNG", len(png_files))
+        st.metric("📑 PDF", len(pdf_files))
+        st.metric("🗺️ HTML", len(html_files))
     else:
         st.info("No hay datos aún")
 
@@ -164,6 +256,7 @@ if page == "🏠 Inicio":
         3. **📊 Estadísticas**: Genera reportes con métricas bibliométricas
         4. **🌳 Clustering**: Visualiza agrupaciones de artículos relacionados
         5. **📈 Visualizaciones**: Explora mapas geográficos y tendencias temporales
+        6. **📁 Resultados**: Ve todos los archivos generados en un solo lugar
         
         ### Bases de datos disponibles:
         - **OpenAlex**: 250M+ artículos multidisciplinarios
@@ -174,10 +267,10 @@ if page == "🏠 Inicio":
         - ✅ 100% gratuito y open source
         - ✅ Sin necesidad de API keys
         - ✅ Análisis con modelos de IA modernos
-        - ✅ Exportación a PDF y CSV
+        - ✅ Exportación a PDF, CSV, PNG y HTML
         """)
     
-    # Footer con info del proyecto
+    # Footer
     st.divider()
     st.markdown("""
     <div style='text-align: center; color: #666; padding: 1rem;'>
@@ -192,7 +285,6 @@ elif page == "📥 Descarga de Artículos":
     
     st.markdown('<div class="info-box">Extrae artículos académicos de bases de datos abiertas usando APIs REST</div>', unsafe_allow_html=True)
     
-    # Formulario de búsqueda
     with st.form("download_form"):
         query = st.text_input(
             "🔎 Cadena de búsqueda:",
@@ -229,55 +321,33 @@ elif page == "📥 Descarga de Artículos":
         else:
             try:
                 with st.spinner("⏳ Descargando artículos... Esto puede tomar unos minutos."):
-                    # Importar módulos
                     from src.download.downloader import run_all
                     from src.download.merger import merge_and_deduplicate
                     
-                    # Ejecutar descarga
                     asyncio.run(run_all(query=query, sources=sources, max_results=max_results))
-                    
-                    # Unificar resultados
                     merge_and_deduplicate()
                 
                 st.markdown('<div class="success-box">✅ Descarga completada exitosamente</div>', unsafe_allow_html=True)
                 
-                # Mostrar resultados
                 unified_path = "data/download/unified.csv"
                 if os.path.exists(unified_path):
-                    df = pd.read_csv(unified_path)
+                    df = display_csv_preview(unified_path, "Artículos Unificados")
                     
-                    # Métricas
-                    col1, col2, col3, col4 = st.columns(4)
-                    col1.metric("📄 Total artículos", len(df))
-                    col2.metric("👥 Autores únicos", df['authors'].nunique())
-                    col3.metric("📚 Journals únicos", df['journal'].nunique())
-                    col4.metric("📅 Años cubiertos", df['year'].nunique())
-                    
-                    # Tabla de resultados
-                    st.markdown("### 📋 Artículos descargados")
-                    st.dataframe(
-                        df[['title', 'authors', 'year', 'journal', 'source']].head(20),
-                        use_container_width=True
-                    )
-                    
-                    # Gráfico de distribución por fuente
-                    if len(df) > 0:
-                        st.markdown("### 📊 Distribución por base de datos")
-                        fig = px.pie(df, names='source', title='Artículos por fuente')
-                        st.plotly_chart(fig, use_container_width=True)
-                    
-                    # Descarga del CSV
-                    csv = df.to_csv(index=False).encode('utf-8')
-                    st.download_button(
-                        label="📥 Descargar CSV completo",
-                        data=csv,
-                        file_name="articulos_descargados.csv",
-                        mime="text/csv"
-                    )
+                    if df is not None:
+                        col1, col2, col3, col4 = st.columns(4)
+                        col1.metric("📄 Total artículos", len(df))
+                        col2.metric("👥 Autores únicos", df['authors'].nunique() if 'authors' in df.columns else 0)
+                        col3.metric("📚 Journals únicos", df['journal'].nunique() if 'journal' in df.columns else 0)
+                        col4.metric("📅 Años", df['year'].nunique() if 'year' in df.columns else 0)
+                        
+                        if 'source' in df.columns and len(df) > 0:
+                            st.markdown("### 📊 Distribución por base de datos")
+                            fig = px.pie(df, names='source', title='Artículos por fuente')
+                            st.plotly_chart(fig, use_container_width=True)
                 
             except Exception as e:
                 st.error(f"❌ Error durante la descarga: {e}")
-                st.info("💡 Consejo: Verifica tu conexión a internet y que las APIs estén disponibles")
+                st.exception(e)
 
 # ==================== PÁGINA: SIMILITUD ====================
 elif page == "🔍 Análisis de Similitud":
@@ -309,29 +379,24 @@ elif page == "🔍 Análisis de Similitud":
                     from src.similarity.vector_models import compute_embeddings
                     from src.similarity.compare import compute_similarity
                     
-                    # Cargar modelo
                     progress_text = st.empty()
-                    progress_text.text("🤖 Cargando modelo de embeddings...")
+                    progress_text.text("🤖 Cargando modelo...")
                     model = load_sentence_model()
                     
-                    # Preprocesar
-                    progress_text.text("🔧 Preprocesando abstracts...")
+                    progress_text.text("🔧 Preprocesando...")
                     df_clean = df[df['abstract'].notna()].copy()
                     df_clean = df_clean[df_clean['abstract'].astype(str).str.strip() != '']
                     
                     if len(df_clean) == 0:
-                        st.error("❌ No hay abstracts válidos para analizar")
+                        st.error("❌ No hay abstracts válidos")
                         st.stop()
                     
-                    # Generar embeddings
                     progress_text.text("🧮 Generando embeddings...")
                     embeddings = compute_embeddings(model, df_clean['abstract'].tolist())
                     
-                    # Calcular similitudes
                     progress_text.text("🔗 Calculando similitudes...")
                     sim_df = compute_similarity(df_clean, embeddings, threshold=threshold)
                     
-                    # Guardar
                     os.makedirs("data/similarity", exist_ok=True)
                     sim_path = "data/similarity/similarities.csv"
                     sim_df.to_csv(sim_path, index=False, encoding='utf-8')
@@ -340,41 +405,20 @@ elif page == "🔍 Análisis de Similitud":
                 
                 st.markdown('<div class="success-box">✅ Análisis completado</div>', unsafe_allow_html=True)
                 
-                # Métricas
-                col1, col2, col3 = st.columns(3)
-                col1.metric("🔗 Pares similares", len(sim_df))
-                col2.metric("📄 Artículos analizados", len(df_clean))
-                col3.metric("🎯 Umbral usado", f"{threshold:.2f}")
-                
-                if len(sim_df) > 0:
-                    # Mostrar resultados
-                    st.markdown("### 🔗 Pares de artículos similares")
-                    st.dataframe(sim_df.head(20), use_container_width=True)
+                if os.path.exists(sim_path):
+                    display_csv_preview(sim_path, "Similitudes Encontradas")
                     
-                    # Histograma de similitudes
-                    st.markdown("### 📊 Distribución de similitudes")
-                    fig = px.histogram(
-                        sim_df,
-                        x='similarity',
-                        nbins=20,
-                        title='Distribución de scores de similitud'
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
-                    
-                    # Descarga
-                    csv = sim_df.to_csv(index=False).encode('utf-8')
-                    st.download_button(
-                        label="📥 Descargar resultados",
-                        data=csv,
-                        file_name="similitudes.csv",
-                        mime="text/csv"
-                    )
-                else:
-                    st.warning(f"⚠️ No se encontraron pares similares con threshold ≥ {threshold}")
-                    st.info("💡 Intenta reducir el umbral de similitud")
+                    if len(sim_df) > 0 and 'similarity' in sim_df.columns:
+                        st.markdown("### 📊 Distribución de similitudes")
+                        fig = px.histogram(sim_df, x='similarity', nbins=20, 
+                                         title='Distribución de scores de similitud')
+                        st.plotly_chart(fig, use_container_width=True)
+                    else:
+                        st.warning(f"⚠️ No se encontraron pares similares con threshold ≥ {threshold}")
                 
             except Exception as e:
                 st.error(f"❌ Error: {e}")
+                st.exception(e)
 
 # ==================== PÁGINA: ESTADÍSTICAS ====================
 elif page == "📊 Estadísticas y Reportes":
@@ -389,39 +433,27 @@ elif page == "📊 Estadísticas y Reportes":
     else:
         df = pd.read_csv(unified_path)
         
-        # Métricas generales
         st.markdown("### 📈 Métricas Generales")
         col1, col2, col3, col4 = st.columns(4)
         col1.metric("📄 Total artículos", len(df))
-        col2.metric("👥 Autores", df['authors'].nunique())
-        col3.metric("📚 Journals", df['journal'].nunique())
-        col4.metric("📅 Años", df['year'].nunique())
+        col2.metric("👥 Autores", df['authors'].nunique() if 'authors' in df.columns else 0)
+        col3.metric("📚 Journals", df['journal'].nunique() if 'journal' in df.columns else 0)
+        col4.metric("📅 Años", df['year'].nunique() if 'year' in df.columns else 0)
         
-        # Artículos por año
         if 'year' in df.columns:
             st.markdown("### 📅 Producción por Año")
             year_counts = df['year'].value_counts().sort_index()
-            fig = px.bar(
-                x=year_counts.index,
-                y=year_counts.values,
-                labels={'x': 'Año', 'y': 'Número de artículos'},
-                title='Distribución temporal de publicaciones'
-            )
+            fig = px.bar(x=year_counts.index, y=year_counts.values,
+                        labels={'x': 'Año', 'y': 'Artículos'})
             st.plotly_chart(fig, use_container_width=True)
         
-        # Top journals
         if 'journal' in df.columns:
             st.markdown("### 📚 Top 10 Journals")
             top_journals = df['journal'].value_counts().head(10)
-            fig = px.bar(
-                x=top_journals.values,
-                y=top_journals.index,
-                orientation='h',
-                labels={'x': 'Número de artículos', 'y': 'Journal'}
-            )
+            fig = px.bar(x=top_journals.values, y=top_journals.index, orientation='h',
+                        labels={'x': 'Artículos', 'y': 'Journal'})
             st.plotly_chart(fig, use_container_width=True)
         
-        # Generar reporte PDF
         if st.button("📄 Generar Reporte PDF", use_container_width=True):
             with st.spinner("⏳ Generando reporte..."):
                 try:
@@ -437,7 +469,7 @@ elif page == "📊 Estadísticas y Reportes":
                                 file_name="analisis_bibliometrico.pdf",
                                 mime="application/pdf"
                             )
-                        st.success("✅ Reporte generado exitosamente")
+                        st.success("✅ Reporte generado")
                 except Exception as e:
                     st.error(f"❌ Error: {e}")
 
@@ -466,22 +498,18 @@ elif page == "🌳 Clustering Jerárquico":
                     
                     st.success("✅ Clustering completado")
                     
-                    # Mostrar dendrogramas
-                    img_path = f"data/clustering/dendrogram_{method}.png"
-                    if os.path.exists(img_path):
-                        st.image(img_path, caption=f"Dendrograma ({method} linkage)")
-                    
-                    # Mostrar todos los métodos
-                    st.markdown("### 📊 Comparación de Métodos")
+                    st.markdown("### 📊 Dendrogramas Generados")
                     cols = st.columns(3)
                     for idx, m in enumerate(["single", "complete", "average"]):
-                        img = f"data/clustering/dendrogram_{m}.png"
-                        if os.path.exists(img):
+                        img_path = f"data/clustering/dendrogram_{m}.png"
+                        if os.path.exists(img_path):
                             with cols[idx]:
-                                st.image(img, caption=f"{m.capitalize()}")
+                                st.markdown(f"**{m.capitalize()} Linkage**")
+                                display_image(img_path, f"Dendrograma {m}")
                 
                 except Exception as e:
                     st.error(f"❌ Error: {e}")
+                    st.exception(e)
 
 # ==================== PÁGINA: VISUALIZACIONES ====================
 elif page == "📈 Visualizaciones":
@@ -497,17 +525,24 @@ elif page == "📈 Visualizaciones":
                 
                 st.success("✅ Visualizaciones generadas")
                 
-                # Mostrar imágenes generadas
                 viz_dir = Path("data/visualization")
                 if viz_dir.exists():
+                    # Mostrar imágenes
                     images = list(viz_dir.glob("*.png"))
-                    
                     if images:
-                        st.markdown("### 🖼️ Visualizaciones Generadas")
+                        st.markdown("### 🖼️ Gráficos Generados")
                         for img in images:
-                            st.image(str(img), caption=img.stem.replace('_', ' ').title())
+                            st.markdown(f"#### {img.stem.replace('_', ' ').title()}")
+                            display_image(str(img), img.stem)
                     
-                    # PDF si existe
+                    # Mostrar HTMLs
+                    htmls = list(viz_dir.glob("*.html"))
+                    if htmls:
+                        st.markdown("### 🗺️ Mapas Interactivos")
+                        for html in htmls:
+                            display_html(str(html), html.stem.replace('_', ' ').title())
+                    
+                    # PDF
                     pdf_path = viz_dir / "visual_analysis.pdf"
                     if pdf_path.exists():
                         with open(pdf_path, "rb") as f:
@@ -520,3 +555,149 @@ elif page == "📈 Visualizaciones":
             
             except Exception as e:
                 st.error(f"❌ Error: {e}")
+                st.exception(e)
+
+# ==================== PÁGINA: VER TODOS LOS RESULTADOS ====================
+elif page == "📁 Ver Todos los Resultados":
+    st.markdown("## 📁 Explorador de Resultados")
+    
+    st.markdown('<div class="info-box">Visualiza todos los archivos generados por cada requerimiento</div>', unsafe_allow_html=True)
+    
+    data_dir = Path("data")
+    
+    if not data_dir.exists():
+        st.warning("⚠️ No hay datos generados aún. Ejecuta primero los módulos de análisis.")
+    else:
+        # Tabs por requerimiento
+        tabs = st.tabs(["📥 Req 1: Descarga", "🔍 Req 2: Similitud", "📊 Req 3: Análisis", 
+                        "🌳 Req 4: Clustering", "📈 Req 5: Visualización"])
+        
+        # REQUERIMIENTO 1: Descarga
+        with tabs[0]:
+            st.markdown("### 📥 Requerimiento 1 - Descarga y Unificación")
+            download_dir = data_dir / "download"
+            
+            if download_dir.exists():
+                csv_files = list(download_dir.glob("*.csv"))
+                if csv_files:
+                    for csv_file in csv_files:
+                        with st.expander(f"📄 {csv_file.stem}", expanded=(csv_file.stem == "unified")):
+                            display_csv_preview(str(csv_file), csv_file.stem)
+                else:
+                    st.info("No hay archivos CSV de descarga aún")
+            else:
+                st.info("Ejecuta el módulo de descarga primero")
+        
+        # REQUERIMIENTO 2: Similitud
+        with tabs[1]:
+            st.markdown("### 🔍 Requerimiento 2 - Análisis de Similitud")
+            similarity_dir = data_dir / "similarity"
+            
+            if similarity_dir.exists():
+                csv_files = list(similarity_dir.glob("*.csv"))
+                if csv_files:
+                    for csv_file in csv_files:
+                        with st.expander(f"📄 {csv_file.stem}", expanded=True):
+                            display_csv_preview(str(csv_file), csv_file.stem)
+                else:
+                    st.info("No hay resultados de similitud aún")
+            else:
+                st.info("Ejecuta el módulo de similitud primero")
+        
+        # REQUERIMIENTO 3: Análisis
+        with tabs[2]:
+            st.markdown("### 📊 Requerimiento 3 - Análisis Estadístico")
+            reports_dir = data_dir / "reports"
+            
+            if reports_dir.exists():
+                # PDFs
+                pdf_files = list(reports_dir.glob("*.pdf"))
+                if pdf_files:
+                    st.markdown("#### 📑 Reportes PDF")
+                    for pdf in pdf_files:
+                        col1, col2 = st.columns([3, 1])
+                        with col1:
+                            st.markdown(f"**{pdf.stem}**")
+                        with col2:
+                            with open(pdf, "rb") as f:
+                                st.download_button(
+                                    label="📥 Descargar",
+                                    data=f,
+                                    file_name=pdf.name,
+                                    mime="application/pdf",
+                                    key=f"pdf_{pdf.stem}"
+                                )
+                
+                # CSVs de análisis
+                csv_files = list(reports_dir.glob("*.csv"))
+                if csv_files:
+                    st.markdown("#### 📊 Datos de Análisis")
+                    for csv in csv_files:
+                        with st.expander(f"📄 {csv.stem}"):
+                            display_csv_preview(str(csv), csv.stem)
+                
+                if not pdf_files and not csv_files:
+                    st.info("No hay reportes generados aún")
+            else:
+                st.info("Ejecuta el módulo de análisis primero")
+        
+        # REQUERIMIENTO 4: Clustering
+        with tabs[3]:
+            st.markdown("### 🌳 Requerimiento 4 - Clustering Jerárquico")
+            clustering_dir = data_dir / "clustering"
+            
+            if clustering_dir.exists():
+                png_files = list(clustering_dir.glob("*.png"))
+                if png_files:
+                    cols = st.columns(min(len(png_files), 3))
+                    for idx, png in enumerate(png_files):
+                        with cols[idx % 3]:
+                            st.markdown(f"**{png.stem.replace('_', ' ').title()}**")
+                            display_image(str(png), png.stem)
+                else:
+                    st.info("No hay dendrogramas generados aún.")
+            else:
+                st.info("Ejecuta el módulo de clustering primero.")
+
+        # REQUERIMIENTO 5: Visualizaciones
+        with tabs[4]:
+            st.markdown("### 📈 Requerimiento 5 - Visualizaciones")
+            viz_dir = data_dir / "visualization"
+            
+            if viz_dir.exists():
+                images = list(viz_dir.glob("*.png"))
+                htmls = list(viz_dir.glob("*.html"))
+                pdfs = list(viz_dir.glob("*.pdf"))
+                
+                if images:
+                    st.markdown("#### 🖼️ Imágenes")
+                    for img in images:
+                        with st.expander(f"🖼️ {img.stem}", expanded=False):
+                            display_image(str(img), img.stem)
+                
+                if htmls:
+                    st.markdown("#### 🗺️ Mapas Interactivos (HTML)")
+                    for html in htmls:
+                        with st.expander(f"🌍 {html.stem}", expanded=False):
+                            display_html(str(html), html.stem)
+                
+                if pdfs:
+                    st.markdown("#### 📑 Reportes PDF")
+                    for pdf in pdfs:
+                        col1, col2 = st.columns([3, 1])
+                        with col1:
+                            st.markdown(f"**{pdf.stem.replace('_', ' ').title()}**")
+                        with col2:
+                            with open(pdf, "rb") as f:
+                                st.download_button(
+                                    label="📥 Descargar PDF",
+                                    data=f,
+                                    file_name=pdf.name,
+                                    mime="application/pdf",
+                                    key=f"pdf_{pdf.stem}"
+                                )
+                if not (images or htmls or pdfs):
+                    st.info("No hay visualizaciones generadas aún.")
+            else:
+                st.info("Ejecuta el módulo de visualización primero.")
+# ==================== FIN DEL ARCHIVO ====================
